@@ -1,4 +1,4 @@
-managed implementation in class zbp_c_zi_poheader_managed1 unique;
+managed implementation in class zcl_zi_poheader_managed1 unique;
 strict ( 2 );
 // Managed: This tells RAP that the BO uses the managed scenario, meaning:
 // 1. Standard operations like Create, Update, Delete, and Read are automatically handled by the RAP framework.
@@ -203,7 +203,3 @@ etag master Lastdatechanged
 // In RAP, you define the action in the behavior definition and implement it in the behavior pool. The frontend just calls it when needed.
 //✅ Summary
 // RAP doesn't handle UI key events like Enter.
-
-
-
-

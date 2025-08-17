@@ -91,11 +91,11 @@ annotate entity ZC_ZI_POHEADER_MANAGED1 with
   @UI.lineItem: [{ position: 60 }]
   @EndUserText.label: 'Country'
   @UI.identification: [{ position: 60 }]
-  @Consumption.valueHelpDefinition:
-  [{ entity: { name: 'ZCNTRY_VH' , element: 'Country' },
-               additionalBinding: [ { localElement: 'CountryDesc' , element: 'Description' } ]
-   }
-  ] 
+//  @Consumption.valueHelpDefinition:
+//  [{ entity: { name: 'ZCNTRY_VH' , element: 'Country' },
+//               additionalBinding: [ { localElement: 'CountryDesc' , element: 'Description' } ]
+//   }
+//  ] 
   // Using additional binding property in F4 help we can fill other related fields dynamically also
   // Example - In our RAP application when user presses F4 on the country ui field, the country description will get filled with values using the additional binding property.
 
