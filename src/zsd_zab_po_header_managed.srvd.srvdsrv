@@ -1,0 +1,5 @@
+@EndUserText.label: 'Service Definition for PO Header Managed'
+define service ZSD_ZAB_PO_HEADER_MANAGED {
+  expose ZC_ZI_POHEADER_MANAGED1 as POHEADER;
+  expose ZC_ZI_POITEM_MANAGED1   as POITEM;
+}

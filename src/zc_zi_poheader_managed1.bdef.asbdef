@@ -1,0 +1,209 @@
+managed implementation in class zbp_c_zi_poheader_managed1 unique;
+strict ( 2 );
+// Managed: This tells RAP that the BO uses the managed scenario, meaning:
+// 1. Standard operations like Create, Update, Delete, and Read are automatically handled by the RAP framework.
+// 2. You only need to implement custom logic (e.g., validations, determinations, actions) in the behavior pool class.
+// 3. The transactional buffer and save sequence are managed by the framework
+//
+// unique: This keyword ensures that each operation is implemented only once in the specified class. It prevents accidental multiple implementations of the same behavior logic
+
+//strict ( 2 ) - You're enforcing strict development standards with strict(2).
+// This line activates Strict Mode Version 2 for the behavior definition:
+// Enforces strong syntax checks and contract compliance.
+// Required if you want to release the BO under the C0 extensibility contract, which allows safe extensions by partners or customers 3.
+// It ensures: - No obsolete syntax is used.
+//               All required annotations and definitions are present.
+//               Better code quality and future-proofing.
+
+with draft; /// This we later added after converting V2 to V4 app. When we add with draft the BD will be in error state, to overcome we have to include "total etag" with etag filed name.
+            /// Also we have to add "draft table" and create the draft table and add the draft actions(added down).
+define behavior for ZC_ZI_POHEADER_MANAGED1 //alias <alias_name>
+persistent table zab_po_head_mngd  // This tells RAP that the BO is backed by the database table zab_po_head_mngd. This is the persistent layer.
+lock master                        // Specifies that locking is handled at the root entity level (master). RAP will automatically manage locks during transactional operations.
+total etag Lastdatetime            // This we later added after converting V2 to V4 app. When we add "with draft" this becomes compulsory 'Total Etag'.
+draft table zab_draft_po           // This also we later added after converting V2 to V4 app.
+// When we add "with draft" this becomes compulsory to add a draft table and create it with quik fix or eclipse suggestion. The draft table will have all the fields of consumption view created
+// The draft table created will by default try to remove all the _(Underscore) from the fields names.
+authorization master ( instance )  // Defines instance-level authorization for the BO. This means access control is checked per instance (e.g., per PO header).
+etag master lastdatetime           // This is a placeholder for ETag support, used for optimistic locking in Fiori apps. You would replace <field_name> with a timestamp or version field.
+{
+  create ( precheck ) { default function GetDefaultsForCreate; }
+
+  // Allows creation of PO headers, with global-level authorization (not per instance).
+  //  create;
+  update ( precheck, features : instance ); //When we add Features : Instance property this becomes dynamic control. Using Dynamic control we can handle Update delete buttons in UI dynamically. Here for Update Button.
+  delete ( precheck, features : instance ); //The method definition and implementation suggestion from ADT wont come in Behavior definition for dynamic contorl, in the global class section this help will show. Here for Delete Button.
+  field ( readonly ) bsart, CountryDesc;
+  field ( mandatory ) bukrs;
+//  association _item { create; }             // Defines an association to a child entity _item (likely PO items), and allows creation of items through the header.
+  association _item { create; with draft; }   // Added with draft later when converted from V2 to V4.
+  mapping for zab_po_head_mngd
+    {
+      Bsart        = bsart;
+      Bukrs        = bukrs;
+      CountryDesc  = country_desc;
+      Ebeln        = ebeln;
+      Land1        = land1;
+      Lastdatetime = lastdatetime;
+      Lifnr        = lifnr;
+      MigoStatus   = migo_status;
+      PoRelease    = po_release;
+      Email        = email;
+    }
+
+// Validation
+//      A validation is a mechanism used to check the correctness and consistency of data during the lifecycle of a business object. Its Triggered during
+//      Validations help ensure that only valid data is processed and persisted.
+//      Triggered during CREATE OR EDIT/UPDATED of the entity only.
+//Purpose of Validations
+//      Prevent invalid or inconsistent data from being saved.
+//      Enforce business rules and constraints.
+//      Provide meaningful error messages to users.
+//Types of Validation Triggers
+//      on modify: Triggered during data modification (create/update).
+//      on save: Triggered just before the data is saved to the database.
+//Key Points
+//      Validations are automatic and context-sensitive.
+//      They are part of the transaction control in RAP.
+//      If a validation fails, the transaction is rejected and no data is saved.
+//      You can define multiple validations for different lifecycle events.
+
+  validation check_email on save { field Email; }
+
+
+// Determination
+  determination migo_status_update on modify { field PoRelease; }  // ON SAVE, ON MODIFY is available-> If want to determine one field value based on other use on modify
+
+
+/////----Important----
+//  The difference between on save and on modify in determinations and validations lies in when and how they are triggered during the transaction lifecycle.
+// ON MODIFY
+//      Trigger Point: Activated immediately when an entity is CREATED OR UPDATED/EDIT.
+//      Purpose: Used to react to changes in data during the modification phase.
+// Common Use:
+//      Auto-filling fields.
+//      Adjusting values based on user input.
+//      Validating data as it's being modified.
+// Think of on modify as real-time logic during data entry or change.
+
+// ON SAVE
+//      Trigger Point: Activated just before the data is persisted to the database.
+//      Purpose: Used for final checks or adjustments before committing the transaction.
+// Common Use:
+//      Final validations.
+//      Setting audit fields (e.g., last_modified_by, last_modified_on).
+//      Ensuring consistency across multiple entities.
+// Think of on save as the last checkpoint before saving.
+
+//Comparison Table
+//  FEATURE            ON MODIFY                        ON SAVE
+//  Timing             During data modification         Before data is saved
+//  Use Case           Enriching/modifying input data   Final validation or enrichment
+//  Context            Entity-level changes             Transaction-level consistency
+//  Typical Usage      Determinations, validations      Determinations, validations
+//  Access to Data     Current entity only              All entities in the transaction
+
+
+//🔧 Example Use Case
+//    on modify determination: Set default currency to "INR" when a new customer is created.
+//    on save validation: Ensure no duplicate customer email exists before saving.
+
+//Trigger Sequence
+//Here’s how determinations fit into the RAP processing flow:
+
+// If  User modifies data (create/update)
+//      1st Determinations on modify are triggered
+//      2nd Validations on modify are triggered
+// If User triggers save
+//      1st Determinations on save are triggered
+//      2nd Validations on save are triggered
+//      Data is persisted if all checks pass
+
+  //----------------------------------------------------------------------------------------------
+  // action POREL: This defines a custom action named POREL for the entity. We have to define and implement a method as 'POREL' in the behavior defination class.
+  // Actions in RAP are operations that can be triggered on entities, typically via UI or API, to perform business logic like approval, rejection, or custom processing.
+  // result [1]: This specifies the cardinality of the result. [1] means the action returns exactly one instance as a result. Cardinality can be:
+  // [0..1]: optional single result...[1]: mandatory single result...[0..*]: multiple results
+  // $self: This indicates that the result type is the same as the entity on which the action is defined. So, if the action is defined on an entity PurchaseOrder, then the result will be of type PurchaseOrder
+  //----------------------------------------------------------------------------------------------
+  //  action POREL result [1] $self;
+  //  action PONOREL result [1] $self;
+
+  action ( features : instance ) POREL result [1] $self;        // Here by using the features : Instance we are enabling the dynamic behavior of the custom ACTION button, like in our case the POREL and PONOREL.
+  action ( features : instance ) PONOREL result [1] $self;
+
+//  What Is GET_INSTANCE_FEATURES?
+//  This is a method you implement in your behavior definition to control which actions are available for a specific instance.
+//  It's part of the dynamic feature control mechanism.
+//  Key Concepts
+//      Feature Control: Determines whether actions like approve, cancel, or submit should be available for a given instance.
+//      Instance-Level:  The control is applied per record, not globally.
+//      Actions:         You can enable or disable custom actions based on conditions like status, user role, or timestamps.
+
+  static action Static_ALL result [1] $self;  // This will be static action button. Static Button will act on all the entities.
+
+/// These below draft related actions we added later when we convert V2 to V4.
+//  Important - These are only to be added to the header Level onlyin Item level.
+  draft action Activate;
+  draft action Edit;
+  draft action Resume;
+  draft action Discard;
+
+  draft determine action Prepare ;
+
+
+
+}
+
+// After converting V2 to V4 we have to do some draft related changes in item Behavior definitions also
+
+define behavior for ZC_ZI_POITEM_MANAGED1 //alias <alias_name>
+persistent table zab_po_item_mngd
+lock dependent by _head
+draft table zab_draft_poitem                   // Added after V2 to V4 conversion
+authorization dependent by _head
+etag master Lastdatechanged
+{
+  update;
+  delete;
+  field ( readonly ) Ebeln, Ebelp;
+  association _head;
+}
+
+
+
+
+// Pre Check Vs Validation ---> Both are ways to keep user away from enetering any wrong or invalid values in the UI.
+//                         ---> Both are to display some error or warning message in the UI like at selection screen output.
+// Pre Check is to check whether an operation (like create, update, delete, or action) is allowed before it is executed.
+// Triggered: Before the operation is performed — during the request processing phase.
+// Use Case:
+// Prevent deletion of approved POs.
+// Block execution of an action if the user lacks permission.
+// Check if the entity is in a valid state for the operation.
+// Pre Check will trigger at the time of transactional buffer.
+
+// Validation is to check business rules after data is entered but before saving.
+// Triggered: During the save sequence, after the transactional buffer is filled.
+// Use Case:
+// Ensure a PO amount is not negative.
+// Check if a required field is filled.
+// Validate relationships between fields.
+
+//Feature      Precheck                              Validation
+//When         Before operation execution            During save sequence
+//Purpose      Block invalid operations early        Enforce business rules before save
+//Scope        Operation-level (create, delete)      Field and entity-level
+//Result       Prevents operation from running       Prevents data from being saved
+
+
+// Can enter press event be controlled in SAP RAP application?
+// In SAP RAP (RESTful ABAP Programming Model), controlling an "Enter press" event—like a user pressing Enter in a UI field—is not directly handled within RAP itself.
+// RAP focuses on backend business logic and transactional behavior, while UI-level events like key presses are typically managed in the frontend layer.
+// In RAP, you define the action in the behavior definition and implement it in the behavior pool. The frontend just calls it when needed.
+//✅ Summary
+// RAP doesn't handle UI key events like Enter.
+
+
+
+

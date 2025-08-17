@@ -1,0 +1,61 @@
+@Metadata.layer: #CORE
+annotate view ZC_ZI_POITEM_MANAGED1
+    with 
+{
+  @UI.facet: [{ position: 10 , label: 'PO Item Data' , type: #IDENTIFICATION_REFERENCE  }]
+
+  @UI.lineItem: [{ position:  10 }]
+  @EndUserText.label: 'PO no.'
+  @UI.identification: [{ position: 10 }]
+  Ebeln;
+  @UI.lineItem: [{ position:  20 }]
+  @EndUserText.label: 'PO Item'
+  @UI.identification: [{ position: 20 }]
+  Ebelp;
+  @UI.lineItem: [{ position:  30 }]
+  @EndUserText.label: 'Material No.'
+  @UI.identification: [{ position: 30 }]
+  Matnr;
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  Here below is the requirement is to show F4 help on Plant and on Storage Location fields.
+//  For Value help we have to as ususal use consumtion.valuehelpdefinition annotation, giving entity name as the 
+//  source CDS/ Value help CDS or from where tHE value will be pulled and entity.element as the corresponding field from cds which has the values.
+  @UI.lineItem: [{ position:  40 }]
+  @EndUserText.label: 'Plant'
+  @UI.identification: [{ position: 40 }]
+  @Consumption.valueHelpDefinition: [{ entity.name: 'ZI_PLANTS_VH' , entity.element: 'Werks' }]   
+  Werks;
+
+// For value help on Storage location we have to give same annotation with Value help CDS and element from cds which is having lgort
+// But the Storage location is dependant on the plant field choosed so we have to add propert additional binding.
+  @UI.lineItem: [{ position:  50 }]
+  @EndUserText.label: 'Sloc.'
+  @UI.identification: [{ position: 50 }]
+  @Consumption.valueHelpDefinition: [{ entity.name: 'ZI_STORAGELOCATION_VH' , entity.element: 'Lgort' ,  
+  additionalBinding: [{ element: 'Plant' , localElement: 'Werks' }]    // Element = The field from cds 'ZI_STORAGELOCATION_VH' which is plant reference value .
+                                                                       // localElement = The plant field from consumption view which is already selected first, use ctrl + space 
+  }]
+  Lgort;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  @UI.lineItem: [{ position:  60 }]
+  @EndUserText.label: 'Quanity'
+  @UI.identification: [{ position: 60 }]
+  Menge;
+  @UI.lineItem: [{ position:  70 }]
+  @EndUserText.label: 'UOM'
+  @UI.identification: [{ position: 70 }]
+  Meins;
+  @UI.lineItem: [{ position:  80 }]
+  @EndUserText.label: 'Price'
+  @UI.identification: [{ position: 80 }]
+  Netpr;
+  @UI.lineItem: [{ position:  90 }]
+  @EndUserText.label: 'Currency'
+  @UI.identification: [{ position: 90 }]
+  Waers;
+  @UI.lineItem: [{ position:  100 }]
+  @EndUserText.label: 'Date & Time'
+  @UI.identification: [{ position: 100 }]
+  Lastdatechanged;
+}

@@ -1,0 +1,129 @@
+@Metadata.layer: #CORE
+
+@UI:{
+    headerInfo:{
+
+     title:{ value: 'Ebeln'},
+     description:{value: 'MigoStatus' },
+
+     typeName: 'Purchase Order Data',
+     typeNamePlural: 'Purchase Order Data' }
+
+     }
+
+annotate entity ZC_ZI_POHEADER_MANAGED1 with
+{
+  @UI.facet:
+  [
+    { position: 10,  label: 'PO Header', type: #IDENTIFICATION_REFERENCE },
+    { position: 20 , label: 'PO Item' ,  type: #LINEITEM_REFERENCE , targetElement: '_item' }
+  ]
+
+  /////---If we want Action button to be in Main header Page then we have to give action in @UI.lineItem
+  @UI.lineItem: [ { position: 10 },
+
+//  {
+//    type: #FOR_ACTION,           // Added for Action button in header page, will showup near create
+//    label: 'PO Release',
+//    dataAction: 'POREL'         // Its like sy-ucomm
+//  //  criticality: 'po_release'   //----> This criticality addition enable to color the Action button ONLY IN OBJECT Page not possible in Main Page. In Mainpage if we put here it will have no effect.
+//  //  for adding color to Action button and the criticality feature we have to add the field in consumption view and add it as the color option here 'po_release' as '3' gives green color
+//  },
+//    {
+//    type: #FOR_ACTION,
+//    label: 'PO Not Release',
+//    dataAction: 'PONOREL'
+//  },
+                       { type: #FOR_ACTION_GROUP, label: 'PO Release Options', actionGroupId: '_ClickRelease' },
+                       { type: #FOR_ACTION,       label: 'PO Release',    dataAction: 'POREL', actionGroupId: '_ClickRelease' },
+                       { type: #FOR_ACTION,       label: 'PO NotRelease', dataAction: 'PONOREL', actionGroupId: '_ClickRelease' } ,
+//   // This button we will use as static button
+                       { type: #FOR_ACTION,       label: 'Release All POs', dataAction: 'Static_ALL',actionGroupId: '_ClickRelease' } ]
+
+  /////---Currently in this example I have given for both.
+  /////---If we want Action button to be in Object Page then we have to give action in @UI.identification
+  @UI.identification: [{ position: 10 }
+                 , 
+                       { type: #FOR_ACTION_GROUP, label: 'PO Release Options', actionGroupId: '_ClickRelease' },
+                       { type: #FOR_ACTION,       label: 'PO Release',    dataAction: 'POREL', actionGroupId: '_ClickRelease' },
+                       { type: #FOR_ACTION,       label: 'PO NotRelease', dataAction: 'PONOREL', actionGroupId: '_ClickRelease' } 
+                       ]
+  //-------------------------------------------------------------------------
+  //    {
+  //    type: #FOR_ACTION,           // Added for Action button in header page, will showup near create
+  //    label: 'PO Release',
+  //    dataAction: 'POREL',        // Its like sy-ucomm
+  //    criticality: 'po_release'   //----> This criticality addition enable to color the Action button ONLY IN OBJECT Page not possible in Main Page
+  //    // for adding color to Action button and the criticality feature we have to add the field in consumption view and add it as the color option here 'po_release' as '3' gives green color
+  //  },
+  //    {
+  //    type: #FOR_ACTION,           // Added for Action button in header page, will showup near create
+  //    label: 'PO Not Release',
+  //    dataAction: 'PONOREL',        // Its like sy-ucomm
+  //    criticality: 'noporelease'  //----> This criticality addition enable to color the Action button ONLY IN OBJECT Page not possible in Main Page
+  //    // for adding color to Action button and the criticality feature we have to add the field in consumption view and add it as the color option here 'noporelease' as '1' gives red color
+  //  }
+
+  //  ]
+  @EndUserText.label: 'PO Number'
+  Ebeln;
+
+  @UI.lineItem: [{ position: 20 }]
+  @EndUserText.label: 'Company Code'
+  @UI.identification: [{ position: 20 }]
+  Bukrs;
+  //
+  //  @UI.lineItem: [{ position: 30 }]
+  //  @EndUserText.label: 'Supplier'
+  //  @UI.identification: [{ position: 30 }]
+  //  Supplier;
+
+  @UI.lineItem: [{ position: 40 }]
+  @EndUserText.label: 'Document Type'
+  @UI.identification: [{ position: 40 }]
+  Bsart;
+
+  @UI.lineItem: [{ position: 50 }]
+  @EndUserText.label: 'Vendor'
+  @UI.identification: [{ position: 50 }]
+  Lifnr;
+
+  @UI.lineItem: [{ position: 60 }]
+  @EndUserText.label: 'Country'
+  @UI.identification: [{ position: 60 }]
+  @Consumption.valueHelpDefinition:
+  [{ entity: { name: 'ZCNTRY_VH' , element: 'Country' },
+               additionalBinding: [ { localElement: 'CountryDesc' , element: 'Description' } ]
+   }
+  ] 
+  // Using additional binding property in F4 help we can fill other related fields dynamically also
+  // Example - In our RAP application when user presses F4 on the country ui field, the country description will get filled with values using the additional binding property.
+
+  Land1;
+
+  @UI.lineItem: [{ position: 70 }]
+  @EndUserText.label: 'Country Name'
+  @UI.identification: [{ position: 70 }]
+  CountryDesc;
+
+  @UI.lineItem: [{ position: 80 }]
+  @EndUserText.label: 'PO Release'
+  @UI.identification: [{ position: 80 }]
+  PoRelease;
+
+  @UI.lineItem: [{ position: 90 }]
+  @EndUserText.label: 'MIGO Status'
+  @UI.identification: [{ position: 90 }]
+  MigoStatus;
+
+  @UI.lineItem: [{ position: 100 }]
+  @EndUserText.label: 'Email ID'
+  @UI.identification: [{ position: 100 }]
+  Email;
+
+  @UI.lineItem: [{ position: 110 }]
+  @EndUserText.label: 'Change Date Time'
+  @UI.identification: [{ position: 110 }]
+  Lastdatetime;
+
+}
