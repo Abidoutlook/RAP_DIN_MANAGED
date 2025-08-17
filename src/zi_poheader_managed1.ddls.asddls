@@ -7,7 +7,7 @@
     sizeCategory: #S,
     dataClass: #MIXED
 }
-define view entity ZI_POHEADER_MANAGED1 as select from zab_po_head_mngd
+define view entity ZI_POHEADER_MANAGED1 as select from z323_pohead_mngd
 {
     key ebeln as Ebeln,
     bukrs as Bukrs,

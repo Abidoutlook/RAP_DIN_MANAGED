@@ -7,7 +7,7 @@
     sizeCategory: #S,
     dataClass: #MIXED
 }
-define view entity ZI_POitem_MANAGED1 as select from zab_po_item_mngd
+define view entity ZI_POitem_MANAGED1 as select from z323_poitem_mngd
 {
     key ebeln as Ebeln,
     key ebelp as Ebelp,
